@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700;800&display=swap');
@@ -139,7 +140,7 @@ export default function UnderConstruction() {
     return () => clearInterval(id);
   }, []);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setMsg("Please enter a valid email address.");
       setMsgSuccess(false);
@@ -147,18 +148,31 @@ export default function UnderConstruction() {
     }
     setBtnText("Sending...");
     setBtnDisabled(true);
+
+    const { error } = await supabase.from("email_signups").insert({ email });
+
+    if (error) {
+      if (error.code === "23505") {
+        setMsg("You're already on the list!");
+      } else {
+        setMsg("Something went wrong. Please try again.");
+      }
+      setMsgSuccess(false);
+      setBtnText("Notify Me");
+      setBtnDisabled(false);
+      return;
+    }
+
+    setMsg("You're on the list! We'll notify you at launch. 🚀");
+    setMsgSuccess(true);
+    setBtnText("Subscribed ✓");
+    setEmail("");
     setTimeout(() => {
-      setMsg("You're on the list! We'll notify you at launch. 🚀");
-      setMsgSuccess(true);
-      setBtnText("Subscribed ✓");
-      setEmail("");
-      setTimeout(() => {
-        setBtnText("Notify Me");
-        setBtnDisabled(false);
-        setMsg("Be the first to know when we launch.");
-        setMsgSuccess(false);
-      }, 4000);
-    }, 800);
+      setBtnText("Notify Me");
+      setBtnDisabled(false);
+      setMsg("Be the first to know when we launch.");
+      setMsgSuccess(false);
+    }, 4000);
   };
 
   return (
