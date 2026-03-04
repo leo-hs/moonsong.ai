@@ -22,9 +22,7 @@ const css = `
 .nebula--2{width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,.14),transparent 70%);bottom:-5%;right:-5%}
 .nebula--3{width:300px;height:300px;background:radial-gradient(circle,rgba(167,139,250,.12),transparent 70%);top:40%;right:15%}
 .uc-page{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1.5rem}
-.uc-logo{display:flex;align-items:center;gap:.55rem;margin-bottom:2.5rem;animation:ucFadeDown .8s ease both}
-.uc-logo svg{width:36px;height:36px}
-.uc-logo span{font-family:'Space Mono',monospace;font-weight:700;font-size:1.35rem;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.uc-logo-img{width:clamp(180px,38vw,280px);height:auto;margin-bottom:2.5rem;animation:ucFadeDown .8s ease both}
 .uc-hero{text-align:center;max-width:680px;margin-bottom:1.8rem}
 .uc-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.15);border-radius:100px;padding:.45rem 1.1rem;margin-bottom:1.6rem;animation:ucFadeDown .8s .15s ease both}
 .uc-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:ucPulse 2s infinite}
@@ -38,12 +36,12 @@ const css = `
 .orbit-ring{animation:ucSpin 25s linear infinite;transform-origin:center}
 @keyframes ucSpin{to{transform:rotate(360deg)}}
 .satellite{animation:ucSpin 25s linear infinite;transform-origin:210px 190px}
-.uc-countdown{display:flex;gap:clamp(.6rem,2vw,1.2rem);margin-bottom:2.2rem;animation:ucFadeUp .8s .6s ease both}
+.uc-countdown{display:flex;justify-content:center;gap:clamp(.6rem,2vw,1.2rem);margin-bottom:2.2rem;animation:ucFadeUp .8s .6s ease both}
 .uc-block{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:clamp(.7rem,2vw,1.1rem) clamp(.9rem,2.5vw,1.5rem);text-align:center;min-width:clamp(62px,14vw,88px);backdrop-filter:blur(10px);transition:border-color .3s,box-shadow .3s}
 .uc-block:hover{border-color:rgba(110,231,183,.25);box-shadow:0 0 30px var(--glow)}
 .uc-num{font-family:'Space Mono',monospace;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;background:linear-gradient(180deg,#fff 30%,var(--muted));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
 .uc-label{font-size:.65rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-top:.25rem;font-weight:600}
-.uc-signup{width:100%;max-width:460px;animation:ucFadeUp .8s .75s ease both}
+.uc-signup{width:100%;max-width:460px;margin:0 auto;animation:ucFadeUp .8s .75s ease both}
 .uc-form{display:flex;gap:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.35rem;transition:border-color .3s,box-shadow .3s}
 .uc-form:focus-within{border-color:rgba(110,231,183,.3);box-shadow:0 0 40px var(--glow),0 0 80px var(--glow2)}
 .uc-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:.95rem;padding:.75rem 1rem}
@@ -174,23 +172,43 @@ export default function UnderConstruction() {
 
         <div className="uc-page">
           {/* Logo */}
-          <div className="uc-logo">
-            <svg viewBox="0 0 36 36" fill="none">
-              <rect x="2" y="2" width="32" height="32" rx="8" fill="url(#ucLg)" />
-              <path d="M12 18l4 4 8-8" stroke="#070b1a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              <defs>
-                <linearGradient id="ucLg" x1="2" y1="2" x2="34" y2="34">
-                  <stop stopColor="#6ee7b7" />
-                  <stop offset="1" stopColor="#38bdf8" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <span>MOONSONG.ai</span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="MOONSONG.ai" className="uc-logo-img" />
 
           {/* Hero */}
           <div className="uc-hero">
             <div className="uc-badge"><span className="dot" /> Under Construction</div>
+
+            {/* Countdown */}
+            <div className="uc-countdown">
+              {(["days", "hours", "mins", "secs"] as const).map((unit) => (
+                <div key={unit} className="uc-block">
+                  <div className="uc-num">{timeLeft[unit]}</div>
+                  <div className="uc-label">{unit.charAt(0).toUpperCase() + unit.slice(1)}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Email Signup */}
+            <div className="uc-signup">
+              <div className="uc-form">
+                <input
+                  className="uc-input"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSignup()}
+                  autoComplete="email"
+                  aria-label="Email address"
+                />
+                <button className="uc-btn" onClick={handleSignup} disabled={btnDisabled}>
+                  {btnText}
+                </button>
+              </div>
+              <p className={`uc-msg${msgSuccess ? " success" : ""}`}>{msg}</p>
+            </div>
+
             <h1 className="uc-title">Something <span className="highlight">Big</span><br />is Coming</h1>
             <p className="uc-desc">We&apos;re building the next-gen coding education platform — interactive courses, real-world projects, and a community that actually vibes with your learning style.</p>
           </div>
@@ -259,36 +277,6 @@ export default function UnderConstruction() {
                 </radialGradient>
               </defs>
             </svg>
-          </div>
-
-          {/* Countdown */}
-          <div className="uc-countdown">
-            {(["days", "hours", "mins", "secs"] as const).map((unit) => (
-              <div key={unit} className="uc-block">
-                <div className="uc-num">{timeLeft[unit]}</div>
-                <div className="uc-label">{unit.charAt(0).toUpperCase() + unit.slice(1)}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Email Signup */}
-          <div className="uc-signup">
-            <div className="uc-form">
-              <input
-                className="uc-input"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSignup()}
-                autoComplete="email"
-                aria-label="Email address"
-              />
-              <button className="uc-btn" onClick={handleSignup} disabled={btnDisabled}>
-                {btnText}
-              </button>
-            </div>
-            <p className={`uc-msg${msgSuccess ? " success" : ""}`}>{msg}</p>
           </div>
 
           {/* Footer */}
